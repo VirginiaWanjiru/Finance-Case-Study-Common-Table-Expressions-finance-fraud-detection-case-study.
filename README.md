@@ -24,6 +24,11 @@ Concepts Learned
 - Table aliases (m., c., t.)
 - PostgreSQL analytics functions
 - CASE statements for conditional logic
+- Learned CTEs (WITH clause) — a game-changer for complex queries
+- Switched to PostgreSQL (Supabase) — industry standard
+- Built real fraud detection logic — multiple CTEs working together
+- Mastered table aliases — cleaner, professional SQL
+- Created a portfolio-ready GitHub repo — organized, documented, shareable
 
 Queries
 1. `customer_fraud_metrics.sql` - Identify high-risk customers
