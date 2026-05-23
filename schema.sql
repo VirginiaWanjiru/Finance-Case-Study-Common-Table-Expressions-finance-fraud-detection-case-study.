@@ -1,4 +1,4 @@
--- Insert Customers
+-- Inserting Customers
 INSERT INTO customers VALUES
 (1, 'John Doe', 'john@email.com', '2023-01-10', 'USA', 'active'),
 (2, 'Sarah Chen', 'sarah@email.com', '2023-02-15', 'USA', 'active'),
@@ -6,7 +6,7 @@ INSERT INTO customers VALUES
 (4, 'Emma Wilson', 'emma@email.com', '2023-04-05', 'Canada', 'active'),
 (5, 'James Garcia', 'james@email.com', '2023-05-12', 'USA', 'suspended');
 
--- Insert Merchants
+-- Inserting Merchants
 INSERT INTO merchants VALUES
 (101, 'Amazon', 'Retail', 'USA', 0.05),
 (102, 'Best Buy', 'Electronics', 'USA', 0.08),
@@ -14,7 +14,7 @@ INSERT INTO merchants VALUES
 (104, 'Local Coffee Shop', 'Food & Beverage', 'USA', 0.02),
 (105, 'Online Gambling Site', 'Gambling', 'Offshore', 0.85);
 
--- Insert Transactions
+-- Inserting Transactions
 INSERT INTO transactions VALUES
 (1001, 1, 101, '2024-05-01', '10:30:00', 45.99, FALSE),
 (1002, 1, 102, '2024-05-02', '14:20:00', 299.99, FALSE),
