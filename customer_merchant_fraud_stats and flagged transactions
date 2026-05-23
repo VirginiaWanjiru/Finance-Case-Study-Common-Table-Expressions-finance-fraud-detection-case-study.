@@ -1,0 +1,94 @@
+WITH customer_metrics AS (
+
+  SELECT 
+      c.customer_id,
+      c.customer_name,
+      COUNT(t.transaction_id) AS total_transactions,
+      SUM(t.amount) AS total_amount_spent,
+      COUNT(CASE WHEN t.is_flagged_fraud = TRUE THEN 1 END) AS fraud_flags,
+      AVG(t.amount) AS avg_transaction_amount
+  FROM customers c 
+  LEFT JOIN transactions t ON c.customer_id = t.customer_id
+  GROUP BY c.customer_id, c.customer_name    
+)
+
+SELECT 
+     customer_id,
+     customer_name,
+     total_transactions,
+     ROUND(total_amount_spent,2 ) AS total_amount_spent,
+     fraud_flags,
+     ROUND(avg_transaction_amount,2) AS avg_transaction_amount,
+     ROUND((fraud_flags:: NUMERIC / NULLIF (total_transactions,0) * 100),2) AS fraud_percentage
+
+     FROM customer_metrics
+     WHERE fraud_flags > 0
+     ORDER BY fraud_flags DESC;
+
+ -- CTE: Identify high-risk merchants
+WITH merchant_fraud_stats AS (
+    SELECT 
+        m.merchant_id,
+        m.merchant_name,
+        m.category,
+        m.risk_score,
+        COUNT(t.transaction_id) AS total_transactions,
+        COUNT(CASE WHEN t.is_flagged_fraud = TRUE THEN 1 END) AS fraud_count,
+        ROUND(AVG(t.amount), 2) AS avg_transaction_amount
+    FROM merchants m
+    LEFT JOIN transactions t ON m.merchant_id = t.merchant_id
+    GROUP BY m.merchant_id, m.merchant_name, m.category, m.risk_score
+)
+SELECT 
+    merchant_id,
+    merchant_name,
+    category,
+    risk_score,
+    total_transactions,
+    fraud_count,
+    ROUND((fraud_count::NUMERIC / NULLIF(total_transactions, 0) * 100), 2) AS fraud_rate_percent,
+    avg_transaction_amount
+FROM merchant_fraud_stats
+WHERE fraud_count > 0
+ORDER BY fraud_count DESC;   
+
+
+-- Find high-risk merchants
+WITH risky_merchants AS (
+    SELECT 
+        m.merchant_id,
+        m.merchant_name,
+        m.risk_score
+    FROM merchants m
+    WHERE m.risk_score > 0.80
+),
+-- Transactions from risky merchants
+flagged_transactions AS (
+    SELECT 
+        t.transaction_id,
+        c.customer_name,
+        rm.merchant_name,
+        t.transaction_date,
+        t.amount,
+        rm.risk_score AS merchant_risk_score,
+        t.is_flagged_fraud,
+        CASE 
+            WHEN t.amount > 1000 AND rm.risk_score > 0.80 THEN 'HIGH ALERT'
+            WHEN rm.risk_score > 0.80 THEN 'MEDIUM ALERT'
+            ELSE 'LOW ALERT'
+        END AS alert_level
+    FROM transactions t
+    JOIN risky_merchants rm ON t.merchant_id = rm.merchant_id
+    JOIN customers c ON t.customer_id = c.customer_id
+)
+SELECT 
+    transaction_id,
+    customer_name,
+    merchant_name,
+    transaction_date,
+    amount,
+    merchant_risk_score,
+    is_flagged_fraud,
+    alert_level
+FROM flagged_transactions
+ORDER BY alert_level DESC, amount DESC;
